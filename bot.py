@@ -15,6 +15,8 @@ import asyncio
 import speech_recognition as sr
 from pydub import AudioSegment
 
+from pypresence import Presence
+
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 intents = discord.Intents.all()
@@ -24,6 +26,11 @@ bot = commands.Bot(command_prefix=";", intents=intents)
 ua = UserAgent()
 header = {'User-Agent': str(ua.firefox)}
 vc = None
+
+RPC = Presence(os.getenv('ID'))
+RPC.connect()
+RPC.update(state="Это я", large_image="me", large_text="Кто?",
+           buttons=[{"label": "-=-=-=-=-=-=-=-=-", "url": "https://github.com/ugine-bor"}])
 
 
 class MainMenuView(discord.ui.View):
@@ -45,6 +52,10 @@ class MainMenuView(discord.ui.View):
     @discord.ui.button(label="Слуйчайный scp", style=discord.ButtonStyle.grey)
     async def grey2_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         await self.rscp(interaction)
+
+    @discord.ui.button(label="Играть", style=discord.ButtonStyle.red)
+    async def red_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await self.game(interaction)
 
     @discord.ui.button(label="test", style=discord.ButtonStyle.green)
     async def green_button(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -116,6 +127,10 @@ class MainMenuView(discord.ui.View):
         response = requests.get('https://scpfoundation.net/random:random-page')
         data = response.url
         await interaction.channel.send(content=data)
+
+    async def game(self, interaction: discord.Interaction):
+        import textgame
+        await interaction.channel.send("Доступна {одна} игра", view=textgame.GameMenu())
 
     async def vc(self, interaction: discord.Interaction):
         await interaction.channel.send("Ждёт", view=musMenu())
@@ -270,6 +285,18 @@ def check(author):
     return inner_check
 
 
+@bot.command()
+async def chngnm(ctx, member: discord.Member, new_name: str):
+    if ctx.author.guild_permissions.administrator:  # Проверяем, имеет ли автор команды права администратора
+        try:
+            await member.edit(nick=new_name)
+            await ctx.send(f'Имя пользователя {member.display_name} успешно изменено на {new_name}')
+        except discord.Forbidden:
+            await ctx.send("У меня нет прав на изменение имени этого участника.")
+    else:
+        await ctx.send("У вас нет прав на использование этой команды.")
+
+
 @bot.listen()
 async def on_message(msg):
     if not msg.content:
@@ -279,10 +306,10 @@ async def on_message(msg):
             f.write(vcmsg.content)
 
         # convert mp3 to wav
-        sound = AudioSegment.from_ogg(r"C:\Pycharm\Projects\Discord_Ultimate_Bot\voice.ogg")
-        sound.export(r"C:\Pycharm\Projects\Discord_Ultimate_Bot\voice.wav", format="wav")
+        sound = AudioSegment.from_ogg(r"voice.ogg")
+        sound.export(r"voice.wav", format="wav")
 
-        with sr.AudioFile(r"C:\Pycharm\Projects\Discord_Ultimate_Bot\voice.wav") as source:
+        with sr.AudioFile(r"voice.wav") as source:
             r = sr.Recognizer()
             audio_text = r.record(source)
 
