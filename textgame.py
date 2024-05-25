@@ -1,5 +1,4 @@
 import discord
-from discord.ext import commands
 
 from time import sleep
 from random import randint
@@ -56,13 +55,12 @@ class State(discord.ui.View):
     def __init__(self, state_name, game):
         super().__init__(timeout=None)
         self.state_name = state_name
+        self.to_answer = None
         if '|' in state_name:
             self.state_name, self.to_answer = state_name.split('|')
         self.variants = []
-        self.to_answer = None
 
     async def enter(self, game):
-
         # if state_name is exit then just exit
         if self.state_name == "exit":
             await game.change_state(EndState())
@@ -73,7 +71,7 @@ class State(discord.ui.View):
             states = json.load(f)
         self.answer = states[self.state_name]["answer"]
 
-        if type(self.answer) == list:
+        if isinstance(self.answer, list):
             if self.to_answer:
                 self.answer = self.answer[int(self.to_answer)]
             else:
@@ -87,35 +85,26 @@ class State(discord.ui.View):
             self.variants.append((i, var, link))
             i += 1
 
+        if self.state_name == "neuv":
+            State.set_loop(State.loop() + 1)
+
         # if already gone through loop, add hidden variant
+        print(State.loop())
         if "hidden" in states[self.state_name]:
-            if State.loop() >= 1:
+            if State.loop() >= 1:  # Use the loop getter
                 self.variants.append(
                     (i, list(states[self.state_name]["hidden"].keys())[0],
                      list(states[self.state_name]["hidden"].values())[0]))
         sleep(0.5)
 
-
         # Print variants and listen choice
         await self.generate_buttons(self.variants)
         await sendmsg(channel, self.answer, view=self)
-
-        # below is for choosen button ########################
-        # await sendmsg(channel, f"\n> {self.variants[choice][1]}")
-
-        # add loop counter
-        # if self.variants[choice][2] == "neuv":
-        #    State.set_loop(State.loop() + 1)
-
-        # next state
-        # game.change_state(State(self.variants[choice][2], game))
-        ##########################################################
 
     @classmethod
     def loop(cls):
         return cls._loop
 
-    # loop setter
     @classmethod
     def set_loop(cls, value):
         cls._loop = value
@@ -124,6 +113,8 @@ class State(discord.ui.View):
         for idx, (i, var, link) in enumerate(variants):
             if len(self.children) >= 25:
                 break
+
+
             button = discord.ui.Button(label=var, style=discord.ButtonStyle.grey)
             button.callback = create_button(link, var).__get__(self)
             self.add_item(button)
