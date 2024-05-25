@@ -40,26 +40,32 @@ class MainMenuView(discord.ui.View):
     @discord.ui.button(label="Habr последняя статья", style=discord.ButtonStyle.blurple)
     async def blue_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         await self.article(interaction)
+        await interaction.response.defer()
 
     @discord.ui.button(label="Habr последние статьи", style=discord.ButtonStyle.blurple)
     async def blue2_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         await self.articles(interaction)
+        await interaction.response.defer()
 
     @discord.ui.button(label="Последние переводы scp", style=discord.ButtonStyle.grey)
     async def grey_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         await self.scp(interaction)
+        await interaction.response.defer()
 
     @discord.ui.button(label="Слуйчайный scp", style=discord.ButtonStyle.grey)
     async def grey2_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         await self.rscp(interaction)
+        await interaction.response.defer()
 
     @discord.ui.button(label="Играть", style=discord.ButtonStyle.red)
     async def red_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         await self.game(interaction)
+        await interaction.response.defer()
 
     @discord.ui.button(label="test", style=discord.ButtonStyle.green)
     async def green_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         await self.vc(interaction)
+        await interaction.response.defer()
 
     async def article(self, interaction: discord.Interaction):
         response = None
@@ -155,6 +161,7 @@ class musMenu(discord.ui.View):  # класс описывает набор кн
         voice_clients = discord.utils.get(interaction.client.voice_clients)
         await voice_clients.disconnect(force=True)
         await interaction.response.edit_message(view=self)
+        await interaction.response.defer()
 
     @discord.ui.button(label="Музыка", style=discord.ButtonStyle.green)
     async def green_button(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -179,6 +186,7 @@ class musMenu(discord.ui.View):  # класс описывает набор кн
         self.red_button.disabled = False
         self.grey_button.disabled = False
         await interaction.response.edit_message(view=self)
+        await interaction.response.defer()
 
     @discord.ui.button(label="Пауза", style=discord.ButtonStyle.grey)
     async def grey_button(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -190,6 +198,7 @@ class musMenu(discord.ui.View):  # класс описывает набор кн
             self.grey_button.label = "Пауза"
             await resum(interaction)
             await interaction.response.edit_message(content=f"Играет музыку", view=self)
+        await interaction.response.defer()
 
 
 @bot.event

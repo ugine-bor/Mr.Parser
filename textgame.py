@@ -7,6 +7,7 @@ import json
 
 def create_button(link, val):
     async def button_grey(self, interaction: discord.Interaction):
+        await interaction.response.defer()
         await sendmsg(channel, f"> {val}")
         await game.change_state(State(link, game))
         await self.update(game)
@@ -39,11 +40,13 @@ class GameMenu(discord.ui.View):
         await sendmsg(channel, "-================================-")
 
         await channel.send("Начать игру?", view=StartState())
+        await interaction.response.defer()
         # await game.update()
 
     @discord.ui.button(label="Выйти", style=discord.ButtonStyle.grey)
     async def grey2_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         await self.exit(interaction)
+        await interaction.response.defer()
 
     async def exit(self, interaction: discord.Interaction):
         await interaction.channel.send("bye")
@@ -94,7 +97,6 @@ class State(discord.ui.View):
             State.set_loop(State.loop() + 1)
 
         # if already gone through loop, add hidden variant
-        print(State.loop())
         if "hidden" in states[self.state_name]:
             if State.loop() >= 1:  # Use the loop getter
                 self.variants.append(
@@ -154,10 +156,12 @@ class StartState(discord.ui.View):
     @discord.ui.button(label="Начать", style=discord.ButtonStyle.grey)
     async def grey1_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         await game.change_state(State("choose_character", game))
+        await interaction.response.defer()
 
     @discord.ui.button(label="Выход", style=discord.ButtonStyle.grey)
     async def grey2_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         await self.exit_game(interaction)
+        await interaction.response.defer()
 
     @discord.ui.button(label="Авторы", style=discord.ButtonStyle.grey)
     async def grey3_button(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -165,6 +169,7 @@ class StartState(discord.ui.View):
             states = json.load(f)
         author = states["intro"]["author"]
         await sendmsg(channel, "Авторы:" + author + '\n')
+        await interaction.response.defer()
 
     async def exit_game(self, interaction: discord.Interaction):
         await interaction.channel.send("bye")
