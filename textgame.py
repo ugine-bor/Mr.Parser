@@ -74,6 +74,11 @@ class State(discord.ui.View):
         if isinstance(self.answer, list):
             if self.to_answer:
                 self.answer = self.answer[int(self.to_answer)]
+            elif self.state_name == "proverka":
+                if State.loop() >= 1:
+                    self.answer = self.answer[1]
+                else:
+                    self.answer = self.answer[0]
             else:
                 self.answer = self.answer[randint(0, len(self.answer) - 1)]
 
@@ -113,7 +118,6 @@ class State(discord.ui.View):
         for idx, (i, var, link) in enumerate(variants):
             if len(self.children) >= 25:
                 break
-
 
             button = discord.ui.Button(label=var, style=discord.ButtonStyle.grey)
             button.callback = create_button(link, var).__get__(self)
